@@ -1,0 +1,29 @@
+import torch
+from transformers import GPT2Tokenizer
+
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+
+# Define the input sequence with two segments of text
+text_a = "This is the first segment of text."
+text_b = "This is the second segment of text."
+input_text = f"{text_a} [SEP] {text_b}"
+
+# Tokenize the input sequence into a sequence of integers
+input_ids = tokenizer.encode(input_text, add_special_tokens=True)
+
+# Create a PyTorch dataset
+dataset = torch.utils.data.TensorDataset(torch.tensor(input_ids))
+
+# Define a PyTorch dataloader to iterate over the dataset
+dataloader = torch.utils.data.DataLoader(
+    dataset,
+    batch_size=1,
+    shuffle=True,
+    num_workers=0,
+    collate_fn=lambda x: x
+)
+
+# Iterate over the dataloader
+for batch in dataloader:
+    input_ids = batch[0]
+    print(input_ids)
