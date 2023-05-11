@@ -52,22 +52,15 @@ class MIMIC_NLE_Dataset(Dataset) :
             "Atelectasis",
             "Consolidation",
             "Edema",
-            "<|unk|>", # todo! 여기 알아내서 채우기
-            "<|unk|>",
-            "<|unk|>",
+            "Enlarged Cardiomediastinum",
+            "Lung Lesion",
+            "Lung Opacity",
             "Pleural Effusion",
             "Pleural Other",
             "Pneumonia",
             "Pneumothorax",
-            # "Enlarged Cardiomediastinum",
-            # "Cardiomegaly",
-            # "Lung Opacity",
-            # "Lung Lesion",
-            # "Fracture",
-            # "Support Devices"
             ]
-        self.evidence_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        self.certaintiy_list = ["negative", "unvertain", "positive"]
+        self.certaintiy_list = ["negative", "uncertain", "positive"]
 
         self.tokenizer = tokenizer
         
@@ -96,23 +89,16 @@ class MIMIC_NLE_Dataset(Dataset) :
         prompt = ""
         
         # diagnosis 정보 추가
-        for idx, diagnosis in enumerate(line['diagnosis_label']) :
-            if diagnosis :
-                prompt += self.diagnosis_list[idx] + ", "
-
-        # evidence 정보 추가 : TODO!
-
+        for idx, diagnosis in enumerate(line['img_labels']) :
+            if diagnosis[1] :
+                prompt += self.certaintiy_list[1] + self.diagnosis_list[idx] + ", "
+            if diagnosis[2] :
+                prompt += self.certaintiy_list[2] + self.diagnosis_list[idx] + ", "
 
         # NLE 추가
         prompt += "<|sep|>" + line['nle'] + "<|endoftext|>"
         
         return prompt
-
-
-
-# =================================================================
-# Dataloader
-# =================================================================
 
 
 
@@ -127,12 +113,14 @@ if __name__ == "__main__" :
     BOS_TOKEN = "<|startoftext|>"
     EOS_TOKEN = "<|endoftext|>"
     SEP_TOKEN = "<|sep|>"
+    PAD_TOKEN = "<|pad|>"
 
     tokenizer = GPT2Tokenizer.from_pretrained(
             'gpt2',
             bos_token=BOS_TOKEN,
             eos_token=EOS_TOKEN,
             sep_token=SEP_TOKEN,
+            pad_token=PAD_TOKEN,
             )
 
     train_dataset = MIMIC_NLE_Dataset(PATH, "train", tokenizer)
@@ -156,7 +144,7 @@ if __name__ == "__main__" :
                 sampler = RandomSampler(test_dataset),
                 batch_size = BATCH_SIZE 
             )
-    
+        
     # =================================================================
     # Model loading
     # =================================================================
@@ -329,7 +317,7 @@ if __name__ == "__main__" :
 
     model.eval()
 
-    prompt = "Pleural Other"
+    prompt = "positive Pleural Other, " + SEP_TOKEN
 
     generated = torch.tensor(tokenizer.encode(prompt)).unsqueeze(0)
     generated = generated.to(device)
