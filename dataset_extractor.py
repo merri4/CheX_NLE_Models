@@ -26,8 +26,8 @@ if __name__ == "__main__" :
     PWD = "./MIMIC-NLE-extractor/mimic-nle/" # 여기 넣으시오!
     EXTENSION = ".json"
     OUTPUTLIST = []
-    CMDTEMPLATE = 'gsutil -m cp -r "gs://mimic-cxr-jpg-2.0.0.physionet.org/files/{}/{}/{}" ./dataset/{}/{}'
-    OUTPUT_PATH = "./batch_shell.sh"
+    CMDTEMPLATE = 'gsutil -m cp -r "gs://mimic-cxr-jpg-2.0.0.physionet.org/files/{}/{}/{}" ./dataset/{}'
+    OUTPUT_PATH = "./batch_shell.bat"
 
     # 3가지에서 돌아가면서
     for split, filename in DATA_SPLIT.items() :
@@ -37,11 +37,11 @@ if __name__ == "__main__" :
 
         # parse data from line to complete the command
         for line in all_lines :
-            cmd = CMDTEMPLATE.format(line['patient_ID'][:3], line['patient_ID'], line['report_ID'], split, line['patient_ID'])
+            
+            cmd = CMDTEMPLATE.format(line['patient_ID'][:3], line['patient_ID'], line['report_ID'], split)
             
             if not exist_cmd(cmd, OUTPUTLIST) :
                 OUTPUTLIST.append(cmd)
-
 
     print("total commands : {}".format(len(OUTPUTLIST)))
 
