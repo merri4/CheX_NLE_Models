@@ -181,8 +181,6 @@ if __name__ == "__main__" :
     epsilon = 1e-8
     optimizer = AdamW(model.parameters(), lr = learning_rate, eps = epsilon)
 
-    # Create the learning rate scheduler.
-    # This changes the learning rate as the training loop progresses
     total_steps = len(train_dataloader) * epochs
     scheduler = get_linear_schedule_with_warmup(optimizer, 
                                                 num_warmup_steps = warmup_steps, 
